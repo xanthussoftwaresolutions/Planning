@@ -1,0 +1,617 @@
+﻿@using Infragistics.Web.Mvc;
+@using Planning.Models;
+@using System.Reflection;
+@{
+    ViewBag.Title = "Items Subtotal Report";
+}
+@using (Html.BeginForm("SubtotalReport", "Report", FormMethod.Post, new { id = "PlanningRequired" }))
+{
+    <div class="container" style="width:100%!important">
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-lg-12 col-xs-12 form-content">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 header_citation">
+                        Items Subtotal Report
+                    </div>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls" style="margin-top:20px">
+
+                    <div class="input-prepend input-append">
+                        <div class="col-md-3">
+
+                            @{int i = 0;}
+                            @foreach (var item in Model)
+                            {
+                                if (i == 0)
+                                {
+                                    @Html.DropDownListFor(x => item.BaseCategory, new List<SelectListItem> { new SelectListItem { Text = "Select Category", Value = "0" } }
+                                    , new { htmlAttributes = new { @class = "form-control" }, @class = "BaseCategory" })
+                                    @*@Html.DropDownListFor(x => item.Category, Enumerable.Empty<SelectListItem>
+                                        ())*@
+                                }
+                                i++;
+                            }
+                        </div>
+                        <div class="col-md-3">
+
+
+                            @{int l = 0;}
+                            @foreach (var item in Model)
+                            {
+                                if (l == 0)
+                                {
+                                    @Html.ListBoxFor(x => item.Category, new List<SelectListItem> { new SelectListItem { Text = "Select Sub Category", Value = "0" } },
+                                   new { @class = "SubCategory", multiple = "multiple" })
+                                    @*@Html.DropDownListFor(x => item.Category, Enumerable.Empty<SelectListItem>
+                                        ())*@
+                                }
+                                l++;
+                            }
+
+
+
+                        </div>
+                    </div>
+                    <div class="col-md-1 col-xs-3">
+                        <a href="javascript:void" data-backdrop="false" id="exportButton" name="exportButton" class="lnkButton btn-block" style="display:none">Export</a>
+                    </div>
+                    <div class="col-xs-1 col-md-1"></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-md-12 usermsg">
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger fade in">
+                        <a href="#" class="close" data-dismiss="alert">&times;</a>
+                        <strong>Error!</strong>@TempData["Error"].ToString()
+                    </div>
+
+                }
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-12 pageContainer">
+                <div id="gridParentContainer" style="display:none!important">
+                    @model IQueryable<Planning.Models.PlanningReportModel>
+                    @(Html.Infragistics()
+                    .Grid(Model)
+                    .ID("igGrid")
+                    .Width("100%")
+                    .Height("470px")
+                    .PrimaryKey("ModelAssemblyId")
+                    .AutoGenerateColumns(false)
+                    .AutoGenerateLayouts(false)
+                    .AutoCommit(false)
+                    .Columns(column =>
+                    {
+                        column.For(x => x.ModelAssemblyId).HeaderText("Model Assembly Id").Width("150px").Hidden(true);
+                        column.For(x => x.ModelName).HeaderText("Model Name").Width("150px").Hidden(true);
+                        column.For(x => x.AssemblyName).HeaderText("Assembly Name").Width("150px").Hidden(true); ;
+                        column.For(x => x.ItemName).HeaderText("Item Name").Width("100px");
+
+                        List<int> WeekColumnPoition = (List<int>)ViewData["WeekColumnPoition"];
+                        Dictionary<string, string> objWeekStartDate = (Dictionary<string, string>)ViewData["WeekStartDate"];
+                        string WeekStartdatevalue = "";
+                        bool isWeekStartDateExists = false;
+                        string WeekColumnwidth = "55px";
+
+
+                        if (WeekColumnPoition != null && objWeekStartDate != null)
+                        {
+                            int j = 0;
+                            foreach (var weekOrder in WeekColumnPoition)
+                            {
+                                if (WeekColumnPoition[j] == 1)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week1).HeaderText("1").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek1Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 2)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week2).HeaderText("2").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek2Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 3)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week3).HeaderText("3").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek3Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 4)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week4).HeaderText("4").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek4Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 5)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week5).HeaderText("5").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek5Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 6)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week6).HeaderText("6").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek6Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 7)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week7).HeaderText("7").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek7Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 8)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week8).HeaderText("8").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek8Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 9)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week9).HeaderText("9").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek9Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 10)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week10).HeaderText("10").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek10Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 11)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week11).HeaderText("11").Width("100px").Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek11Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 12)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week12).HeaderText("12").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek12Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 13)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week13).HeaderText("13").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek13Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 14)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week14).HeaderText("14").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek14Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 15)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week15).HeaderText("15").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek15Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 16)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week16).HeaderText("16").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek16Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 17)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week17).HeaderText("17").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek17Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 18)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week18).HeaderText("18").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek18Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 19)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week19).HeaderText("19").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek19Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 20)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week20).HeaderText("20").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek20Visible).First()));
+                                    });
+
+                                }
+                                if (WeekColumnPoition[j] == 21)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week21).HeaderText("21").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek21Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 22)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week22).HeaderText("22").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek22Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 23)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week23).HeaderText("23").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek23Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 24)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week24).HeaderText("24").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek24Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 25)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week25).HeaderText("25").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek25Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 26)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week26).HeaderText("26").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek26Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 27)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week27).HeaderText("27").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek27Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 28)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week28).HeaderText("28").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek28Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 29)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week29).HeaderText("29").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek29Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 30)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week30).HeaderText("30").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek30Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 31)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week31).HeaderText("31").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek31Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 32)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week32).HeaderText("32").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek32Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 33)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week33).HeaderText("33").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek33Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 34)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week34).HeaderText("34").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek34Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 35)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week35).HeaderText("35").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek35Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 36)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week36).HeaderText("36").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek36Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 37)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week37).HeaderText("37").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek37Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 38)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week38).HeaderText("38").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek38Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 39)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week39).HeaderText("39").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek39Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 40)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week40).HeaderText("40").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek40Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 41)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week41).HeaderText("41").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek41Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 42)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week42).HeaderText("42").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek42Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 43)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week43).HeaderText("43").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek43Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 44)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week44).HeaderText("44").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek44Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 45)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week45).HeaderText("45").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek45Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 46)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week46).HeaderText("46").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek46Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 47)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week47).HeaderText("47").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek47Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 48)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week48).HeaderText("48").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek48Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 49)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week49).HeaderText("49").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek49Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 50)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week50).HeaderText("50").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek50Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 51)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week51).HeaderText("51").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek51Visible).First()));
+                                    });
+                                }
+                                if (WeekColumnPoition[j] == 52)
+                                {
+                                    isWeekStartDateExists = objWeekStartDate.TryGetValue(WeekColumnPoition[j].ToString(), out WeekStartdatevalue);
+                                    column.MultiColumnHeader().HeaderText(WeekStartdatevalue).Width(WeekColumnwidth).Group(c =>
+                                    {
+                                        c.For(x => x.week52).HeaderText("52").Width(WeekColumnwidth).Hidden(Convert.ToBoolean(Model.Select(x => x.Isweek52Visible).First()));
+                                    });
+                                }
+
+                                j = j + 1;
+                            }
+                        }
+
+                    })
+                    .Features(f =>
+                    {
+                        f.ColumnFixing().ColumnSettings(
+                            cs =>
+                            {
+                                cs.ColumnSetting().ColumnKey("ModelName").AllowFixing(true).IsFixed(true);
+                                cs.ColumnSetting().ColumnKey("AssemblyName").AllowFixing(true).IsFixed(true);
+                            }
+                            );
+                        f.Selection().Mode(SelectionMode.Row);
+                        f.Selection().MultipleSelection(false);
+                        //f.Filtering()
+                        //.Mode(FilterMode.Simple);
+                        f.Paging()
+                            .PageSize(25);
+                        f.Sorting()
+                            .Mode(SortingMode.Multiple);
+
+                        f.Updating().ColumnSettings(cs =>
+                        {
+                            cs.ColumnSetting().ColumnKey("ModelAssemblyId").ReadOnly(true);
+                            cs.ColumnSetting().ColumnKey("ModelName").ReadOnly(true);
+                            cs.ColumnSetting().ColumnKey("AssemblyName").ReadOnly(true);
+
+                            cs.ColumnSetting().ColumnKey("ItemName").ReadOnly(true);
+                            cs.ColumnSetting().ColumnKey("CurrentStock").ReadOnly(true);
+
+                            List<int> WeekColumnPoition = (List<int>)ViewData["WeekColumnPoition"];
+                            if (WeekColumnPoition != null)
+                            {
+                                foreach (var item in WeekColumnPoition)
+                                {
+                                    cs.ColumnSetting().ColumnKey(Convert.ToString(item)).ReadOnly(true);
+                                }
+                            }
+
+                        }).EditMode(GridEditMode.None).EnableAddRow(false).EnableDeleteRow(false).ShowDoneCancelButtons(false);
+                        f.ColumnFixing().FixingDirection(ColumnFixingDirection.Left);
+                        f.MultiColumnHeaders().Inherit(false);
+                        f.ColumnFixing();
+
+
+                    })
+                    //.UpdateUrl(Url.Action("SaveData", "Planning"))
+                    //.DataSourceUrl(Url.Action("GetWeekWiseGridByCategory/" , "Planning", new { categoryId = TempData["categoryId"].ToString() }))
+                    //.DataSourceUrl("/Planning/GetWeekWiseGridByCategoryJson/?categoryID=2")
+                    .DataBind()
+                    .Render())
+
+
+                </div>
+            </div>
+            <div class="loading" align="center">
+                <br />
+                <img id="imgloader" src="~/Images/loader.gif" alt="" />
+            </div>
+        </div>
+    </div>
+
+                                }
+
+<script type="text/javascript">
+
+    var tmpSubCategoryId = '@TempData["subCategoryId"]';
+    var tmpBaseCategoryId = '@TempData["baseCategoryId"]';
+    @*var tmpFromDate = '@(TempData["fromDate"])';
+    var tmpToDate = '@(TempData["toDate"])';*@
+    var tmpGridDataExist = '@(TempData["CategoryDataExist"])';
+
+</script>
+<script src="../../js/ViewJS/SubtotalReport.js"></script>
